@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UCH PT Onco team PCA relieving system</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            clinical: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+            },
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-clinical-700 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          PT
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+            UCH PT Onco team PCA relieving system
+          </h1>
+          <p class="text-xs text-slate-500 font-medium">
+            Onco Team &bull; GROn Relieving &amp; WhatsApp Generator
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- 7-Day History Button -->
+        <button id="openHistoryBtn" type="button"
+          class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl shadow-sm transition active:scale-[0.99]">
+          <svg class="w-4 h-4 text-clinical-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>7-Day Log</span>
+          <span id="historyCountBadge" class="bg-clinical-600 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Notification Banner (Non-blocking replacement for alert) -->
+  <div id="toastBanner" class="fixed bottom-4 right-4 z-50 hidden transform transition-all duration-200">
+    <div class="bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-sm font-medium border border-slate-700">
+      <span id="toastIcon" class="text-emerald-400 font-bold">&#10003;</span>
+      <span id="toastText">Copied to clipboard!</span>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN: Configuration Form (7 cols on lg) -->
+    <div class="lg:col-span-7 space-y-5">
+
+      <!-- Card 1: Date, Weekday & Routine Reference -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-clinical-100 text-clinical-800 font-bold text-xs flex items-center justify-center">1</span>
+            <h2 class="font-bold text-slate-900 text-sm sm:text-base">Date &amp; Weekday Schedule</h2>
+          </div>
+          <span id="formattedDateTag" class="text-xs font-mono font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">
+            &lt;--/--/----&gt;
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="dutyDate" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              Duty Date
+            </label>
+            <input type="date" id="dutyDate"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-clinical-600" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">
+              Work Pattern (Auto-detected from Date)
+            </label>
+            <div id="weekdayButtons" class="grid grid-cols-5 gap-1.5">
+              <button type="button" data-day="Monday" class="day-btn py-2.5 rounded-xl text-xs font-bold border transition">Mon</button>
+              <button type="button" data-day="Tuesday" class="day-btn py-2.5 rounded-xl text-xs font-bold border transition">Tue</button>
+              <button type="button" data-day="Wednesday" class="day-btn py-2.5 rounded-xl text-xs font-bold border transition">Wed</button>
+              <button type="button" data-day="Thursday" class="day-btn py-2.5 rounded-xl text-xs font-bold border transition">Thu</button>
+              <button type="button" data-day="Friday" class="day-btn py-2.5 rounded-xl text-xs font-bold border transition">Fri</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 2: Onco Team Manpower -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-clinical-100 text-clinical-800 font-bold text-xs flex items-center justify-center">2</span>
+            <h2 class="font-bold text-slate-900 text-sm sm:text-base">Onco Team Available Manpower</h2>
+          </div>
+          <span id="oncoStatusPill" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Full Team (2 PCAs)
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="pca1Input" class="block text-xs font-semibold text-slate-700 mb-1">
+              1st PCA (Main Duty)
+            </label>
+            <input type="text" id="pca1Input" value="" placeholder="e.g. Alice"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-clinical-600" />
+            <p class="text-[11px] text-slate-400 mt-1">Handles PRP class, Hospice Day &amp; main ward duties.</p>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="pca2Input" class="block text-xs font-semibold text-slate-700">
+                2nd PCA (Relieving Duty)
+              </label>
+              <button type="button" id="clearPca2Btn" class="text-[11px] font-semibold text-rose-600 hover:underline">
+                Leave Blank (Down)
+              </button>
+            </div>
+            <input type="text" id="pca2Input" value="" placeholder="Leave blank if Onco is down 1"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-clinical-600" />
+            <p class="text-[11px] text-slate-400 mt-1">Leave blank if Onco is short-staffed today.</p>
+          </div>
+        </div>
+
+        <!-- Monday Specific Optional 1st PCA Afternoon Ward Note -->
+        <div id="mondayExtraContainer" class="hidden pt-2 border-t border-slate-100">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label class="text-xs font-semibold text-slate-700">
+              Monday 13:00–14:15 PRP Class Return Ward (1st PCA):
+            </label>
+            <div class="flex items-center gap-1.5">
+              <button type="button" data-mon-ward="4B" class="mon-ward-btn px-3 py-1 rounded-lg text-xs font-bold border transition">回4B</button>
+              <button type="button" data-mon-ward="7A" class="mon-ward-btn px-3 py-1 rounded-lg text-xs font-bold border transition">回7A</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 3: Thursday ONLY Departmental Activity -->
+      <section id="thursdaySection" class="hidden bg-amber-50/70 rounded-2xl border border-amber-200 shadow-sm p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-amber-200/70 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-amber-200 text-amber-900 font-bold text-xs flex items-center justify-center">!</span>
+            <h2 class="font-bold text-amber-950 text-sm sm:text-base">Thursday Departmental Activity (13:00–14:00)</h2>
+          </div>
+          <span class="text-[11px] font-bold uppercase tracking-wider bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-md">
+            Thursday Only
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <label class="cursor-pointer">
+            <input type="radio" name="thuActivity" value="none" class="peer sr-only" checked />
+            <div class="p-3 rounded-xl border border-amber-200 bg-white peer-checked:border-clinical-600 peer-checked:bg-clinical-50 peer-checked:ring-2 peer-checked:ring-clinical-600/20 transition h-full">
+              <div class="font-bold text-xs text-slate-900">No Activity</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">Normal 1300-1400 workflow &amp; OPD support.</div>
+            </div>
+          </label>
+
+          <label class="cursor-pointer">
+            <input type="radio" name="thuActivity" value="all_meeting" class="peer sr-only" />
+            <div class="p-3 rounded-xl border border-amber-200 bg-white peer-checked:border-amber-600 peer-checked:bg-amber-100/60 peer-checked:ring-2 peer-checked:ring-amber-600/20 transition h-full">
+              <div class="font-bold text-xs text-slate-900">Dept Meeting / activity (All Staff)</div>
+              <div class="text-[11px] text-slate-600 mt-0.5">Includes PCA (全部人開會). Dissolves 1300-1400 OPD &amp; shifts PM relief.</div>
+            </div>
+          </label>
+
+          <label class="cursor-pointer">
+            <input type="radio" name="thuActivity" value="inservice" class="peer sr-only" />
+            <div class="p-3 rounded-xl border border-amber-200 bg-white peer-checked:border-indigo-600 peer-checked:bg-indigo-50/70 peer-checked:ring-2 peer-checked:ring-indigo-600/20 transition h-full">
+              <div class="font-bold text-xs text-slate-900">Inservice / PT Meeting</div>
+              <div class="text-[11px] text-slate-600 mt-0.5">Excludes PCA (PT 開會). 1st PCA covers Room 11 / ward duty.</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Room 11 & OSH Checkboxes + Target Ward (Visible for Thursday All-Staff Meeting, Inservice, or No Activity) -->
+        <div id="thuRoom11Box" class="hidden bg-white rounded-xl border border-amber-200 p-3.5 space-y-3">
+          <div class="text-xs font-bold text-slate-800">
+            1st PCA Special Task after activity:
+          </div>
+          <div class="flex flex-wrap items-center gap-4">
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="chkCleanRoom11" class="w-4 h-4 rounded text-clinical-600 focus:ring-clinical-600 border-slate-300" />
+              <span class="text-xs sm:text-sm font-medium text-slate-700">Clean Room 11 (清潔11房)</span>
+            </label>
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="chkCheckOsh" class="w-4 h-4 rounded text-clinical-600 focus:ring-clinical-600 border-slate-300" />
+              <span class="text-xs sm:text-sm font-medium text-slate-700">Check OSH (OSH)</span>
+            </label>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+            <label for="thuAfterTaskWard" class="text-xs font-semibold text-slate-700">
+              1st PCA Go to Ward after task / activity:
+            </label>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button type="button" data-thu-ward="4B" class="thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">4B</button>
+              <button type="button" data-thu-ward="6B" class="thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">6B</button>
+              <button type="button" data-thu-ward="7A" class="thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">7A</button>
+              <button type="button" data-thu-ward="5AC" class="thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">5AC</button>
+              <button type="button" data-thu-ward="3EON" class="thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">3EON</button>
+              <button type="button" data-thu-ward="2DM" class="thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">2DM</button>
+              <input type="text" id="thuAfterTaskWard" value="4B" placeholder="4B"
+                class="w-20 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-clinical-600" />
+            </div>
+          </div>
+
+          <!-- 2nd PCA Thursday Afternoon Ward Selection (hidden if 2nd PCA is blank) -->
+          <div id="thuPca2WardRow" class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+            <label for="thuPca2AfterWard" class="text-xs font-semibold text-slate-700">
+              2nd PCA Go to Ward (13:00 / after activity):
+            </label>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button type="button" data-thu-pca2-ward="4B" class="thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">4B</button>
+              <button type="button" data-thu-pca2-ward="6B" class="thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">6B</button>
+              <button type="button" data-thu-pca2-ward="7A" class="thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">7A</button>
+              <button type="button" data-thu-pca2-ward="5AC" class="thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">5AC</button>
+              <button type="button" data-thu-pca2-ward="3EON" class="thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">3EON</button>
+              <button type="button" data-thu-pca2-ward="2DM" class="thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border transition">2DM</button>
+              <input type="text" id="thuPca2AfterWard" value="" placeholder="Optional"
+                class="w-20 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-clinical-600" />
+            </div>
+            <p class="w-full text-[11px] text-slate-400">
+              * Automatically overridden if 2nd PCA is scheduled for GROn relieving from 13:00.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 4: Routine Support From Other Teams -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-clinical-100 text-clinical-800 font-bold text-xs flex items-center justify-center">3</span>
+            <h2 class="font-bold text-slate-900 text-sm sm:text-base">Routine Support From Other Teams</h2>
+          </div>
+          <span id="supportDayBadge" class="text-xs font-semibold text-slate-500">Monday Support</span>
+        </div>
+
+        <div id="supportDissolvedNotice" class="hidden bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 text-xs font-medium">
+          13:00–14:00 OPD routine support is dissolved due to Thursday Departmental Meeting (including PCA).
+        </div>
+
+        <div id="supportInputsContainer" class="space-y-3">
+          <!-- Dynamically populated based on weekday -->
+        </div>
+      </section>
+
+      <!-- Card 5: GROn Relieving System -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-clinical-100 text-clinical-800 font-bold text-xs flex items-center justify-center">4</span>
+            <h2 class="font-bold text-slate-900 text-sm sm:text-base">GROn Relieving System (Geri &bull; Rehab &bull; Onco)</h2>
+          </div>
+          <span id="downSummaryBadge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">
+            Down 0
+          </span>
+        </div>
+
+        <!-- Down Level Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+            Total GROn Shortage Level today
+          </label>
+          <div id="downLevelButtons" class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
+            <button type="button" data-down="0" class="down-btn py-2 px-1 rounded-xl text-xs font-bold border transition">Down 0</button>
+            <button type="button" data-down="0.5 am" class="down-btn py-2 px-1 rounded-xl text-xs font-bold border transition">0.5 am</button>
+            <button type="button" data-down="0.5 pm" class="down-btn py-2 px-1 rounded-xl text-xs font-bold border transition">0.5 pm</button>
+            <button type="button" data-down="1" class="down-btn py-2 px-1 rounded-xl text-xs font-bold border transition">Down 1</button>
+            <button type="button" data-down="1.5 am" class="down-btn py-2 px-1 rounded-xl text-xs font-bold border transition">1.5 am</button>
+            <button type="button" data-down="1.5 pm" class="down-btn py-2 px-1 rounded-xl text-xs font-bold border transition">1.5 pm</button>
+            <button type="button" data-down="2" class="down-btn py-2 px-1 rounded-xl text-xs font-bold border transition">Down 2</button>
+          </div>
+        </div>
+
+        <!-- Team Shortage Breakdown (Dynamic) -->
+        <div id="shortageBreakdownContainer" class="hidden bg-slate-50 rounded-xl border border-slate-200 p-3.5 space-y-3">
+          <!-- Populated dynamically for Down 0.5/1, Down 1.5, or Down 2 -->
+        </div>
+
+        <!-- Calculated Relieving Slots & Target Wards -->
+        <div id="relievingSlotsContainer" class="space-y-2.5">
+          <!-- Populated dynamically with active relieving slots and editable ward/return inputs -->
+        </div>
+      </section>
+
+      <!-- Submit & Generate Action Bar -->
+      <div class="pt-1 pb-4">
+        <button id="generateBtn" type="button"
+          class="w-full bg-clinical-700 hover:bg-clinical-800 text-white font-bold text-sm sm:text-base py-3.5 px-6 rounded-2xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2.5 active:scale-[0.99]">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Arrange Workflow &amp; Save to 7-Day Log</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: WhatsApp Message Outputs (5 cols on lg) -->
+    <div class="lg:col-span-5 space-y-5">
+      <div class="lg:sticky lg:top-20 space-y-5">
+
+        <!-- Output 1: Whole Workflow WhatsApp Message -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="bg-emerald-700 text-white px-4 py-3 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-sm">1. Whole PCA Workflow (完整工作安排)</h3>
+              <p class="text-[11px] text-emerald-100">For overall team &amp; cross-team coordination</p>
+            </div>
+            <button type="button" data-copy-target="msgWholeWorkflow"
+              class="copy-btn bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy</span>
+            </button>
+          </div>
+          <div class="p-4 bg-[#efeae2]">
+            <div class="bg-[#d9fdd3] rounded-2xl rounded-tr-sm p-3.5 shadow-sm border border-emerald-200/80">
+              <textarea id="msgWholeWorkflow" rows="8"
+                class="w-full bg-transparent text-slate-900 font-mono text-xs sm:text-sm leading-relaxed focus:outline-none resize-y"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Output 2: Onco Team PCA Reference Message -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-sm">2. Onco PCA Reference (PCA 個人提示)</h3>
+              <p class="text-[11px] text-slate-300">Individual summary for your own Onco PCAs</p>
+            </div>
+            <button type="button" data-copy-target="msgPcaReference"
+              class="copy-btn bg-clinical-500 hover:bg-clinical-400 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy</span>
+            </button>
+          </div>
+          <div class="p-4 bg-[#efeae2]">
+            <div class="bg-white rounded-2xl rounded-tl-sm p-3.5 shadow-sm border border-slate-200">
+              <textarea id="msgPcaReference" rows="8"
+                class="w-full bg-transparent text-slate-900 font-mono text-xs sm:text-sm leading-relaxed focus:outline-none resize-y"></textarea>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- 7-Day History Modal / Slide-over Drawer -->
+  <div id="historyModal" class="fixed inset-0 z-50 hidden">
+    <div id="historyBackdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"></div>
+    <div class="fixed inset-y-0 right-0 max-w-xl w-full bg-white shadow-2xl flex flex-col z-10">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h2 class="font-bold text-base text-slate-900">7-Day Workflow History Log</h2>
+          <p class="text-xs text-slate-500">Automatically saved locally for at least 7 days (up to 14 days retained)</p>
+        </div>
+        <button id="closeHistoryBtn" type="button" class="p-2 rounded-xl text-slate-500 hover:bg-slate-200 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="historyListContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-100/70">
+        <!-- Populated dynamically from localStorage -->
+      </div>
+
+      <div class="px-5 py-3 border-t border-slate-200 bg-white flex items-center justify-between text-xs text-slate-500">
+        <span>Saved in browser storage</span>
+        <button id="clearAllHistoryBtn" type="button" class="text-rose-600 hover:underline font-semibold">
+          Clear All Logs
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // CONSTANTS & ROUTINE DATA
+      // =========================================================================
+      const STORAGE_KEY = 'uch_onco_pca_workflow_history_v1';
+      const RETENTION_DAYS = 10; // Retain at least 7 days (10 days ensures full 7 working days)
+      const COMMON_WARDS = ['6B', '4B', '7A', '5AC', '3EON', '2DM'];
+
+      const ROUTINE_DATA = {
+        Monday: {
+          pca1: 'AM: 6B → 4B | PM: 13:00–14:15/14:30 PRP class → 4B/7A → 3EON',
+          pca2: 'AM: 6B → 7A | PM: 7A → 2DM',
+          supportDesc: 'Monday Support: 2 × OPD (13:00–14:00)',
+        },
+        Tuesday: {
+          pca1: 'AM: 6B → 4B | PM: 4B → 3EON',
+          pca2: 'AM: 6B → 7A | PM: 7A → 2DM',
+          supportDesc: 'Tuesday Support: 1 × Rehab (13:00–14:00) + 1 × OPD (16:15–17:18)',
+        },
+        Wednesday: {
+          pca1: 'AM: 08:30–10:15 PRP class → 6B → 4B | PM: 4B → 3EON',
+          pca2: 'AM: 6B → 7A | PM: 7A → 2DM',
+          supportDesc: 'Wednesday Support: 2 × OPD (13:00–14:00)',
+        },
+        Thursday: {
+          pca1: 'AM: 6B → 10:30–12:00 Hospice Day | PM: 4B → 3EON',
+          pca2: 'AM: 6B → 7A or 4B | PM: 7A → 2DM',
+          supportDesc: 'Thursday Support: 2 × OPD (13:00–14:00, unless All-Staff Meeting)',
+        },
+        Friday: {
+          pca1: 'AM: 6B → 4B | PM: 4B → 14:30–16:00 Hospice Day → 3EON',
+          pca2: 'AM: 6B → 7A | PM: 7A → 2DM',
+          supportDesc: 'Friday Support: 1 × Ortho (13:00–14:00) + 1 × OPD (16:15–17:18)',
+        },
+      };
+
+      // =========================================================================
+      // APPLICATION STATE
+      // =========================================================================
+      const INITIAL_DATE = getTodayISO();
+      const INITIAL_WEEKDAY = getWeekdayFromISO(INITIAL_DATE);
+
+      let state = {
+        dateStr: INITIAL_DATE,
+        weekday: INITIAL_WEEKDAY,
+        pca1: 'Alice',
+        pca2: '璇',
+        mondayReturnWard: '4B',
+        // Routine support wards
+        support: {
+          opd1: '7A',
+          opd2: '7A',
+          rehab1300: '7A',
+          ortho1300: '7A',
+          opd1615: '2DM',
+        },
+        // Thursday special options (preset to all_meeting with cleaning/OSH unchecked and ward slots blank)
+        thuActivity: 'all_meeting',
+        cleanRoom11: false,
+        checkOsh: false,
+        thuAfterTaskWard: '',
+        thuPca2AfterWard: '',
+        // GROn Relieving system
+        downLevel: '0', // '0' | '0.5 am' | '0.5 pm' | '1' | '1.5 am' | '1.5 pm' | '2'
+        downSingleTeam: 'Rehab',
+        down1Team: 'Rehab',
+        down05Team: 'Geri',
+        down2Teams: ['Rehab', 'Onco'],
+        slotOverrides: {},
+      };
+
+      // =========================================================================
+      // HELPER UTILITIES (Date, Toast, Clipboard)
+      // =========================================================================
+      function getTodayISO() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+      }
+
+      function getWeekdayFromISO(isoStr) {
+        if (!isoStr) return 'Monday';
+        const parts = isoStr.split('-').map(Number);
+        const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+        const dayIdx = dt.getDay(); // 0 = Sun, 1 = Mon, ..., 5 = Fri, 6 = Sat
+        const map = ['Monday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Monday'];
+        return map[dayIdx] || 'Monday';
+      }
+
+      function formatDisplayDate(isoStr) {
+        if (!isoStr) return '--/--/----';
+        const [y, m, d] = isoStr.split('-').map(Number);
+        return `${d}/${m}/${y}`;
+      }
+
+      let toastTimer = null;
+      function showToast(message, isError = false) {
+        const banner = document.getElementById('toastBanner');
+        const icon = document.getElementById('toastIcon');
+        const text = document.getElementById('toastText');
+        if (!banner || !text) return;
+
+        text.textContent = message;
+        if (icon) {
+          icon.textContent = isError ? '!' : '✓';
+          icon.className = isError ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold';
+        }
+        banner.classList.remove('hidden');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          banner.classList.add('hidden');
+        }, 2600);
+      }
+
+      function copyTextToClipboard(text) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        temp.setAttribute('readonly', '');
+        temp.style.position = 'fixed';
+        temp.style.left = '-9999px';
+        document.body.appendChild(temp);
+        temp.select();
+        try {
+          document.execCommand('copy');
+          showToast('Copied WhatsApp message!');
+        } catch (err) {
+          showToast('Failed to copy text.', true);
+        }
+        document.body.removeChild(temp);
+      }
+
+      // =========================================================================
+      // GRON RELIEVING SCHEDULE ENGINE
+      // =========================================================================
+      function getGronScheduleTable(downLevel, weekday) {
+        const isFriday = weekday === 'Friday';
+
+        const schedules = {
+          '0.5 am': [
+            { id: 'am1', time: '0830-0945', role: 'By Oncol' },
+            { id: 'am2', time: '0945-1045', role: 'By Rehab' },
+            { id: 'am3', time: '1045-1200', role: 'By Geri' },
+          ],
+          '0.5 pm': [
+            { id: 'pm1', time: '1300-1430', role: 'By Oncol' },
+            { id: 'pm2', time: '1430-1545', role: 'By Geri' },
+            { id: 'pm3', time: '1545-1718', role: 'By Rehab' },
+          ],
+          '1': [
+            { id: 'am1', time: '0830-0945', role: 'By Oncol' },
+            { id: 'am2', time: '0945-1045', role: 'By Rehab' },
+            { id: 'am3', time: '1045-1200', role: 'By Geri' },
+            { id: 'pm1', time: '1300-1430', role: 'By Oncol' },
+            { id: 'pm2', time: '1430-1545', role: 'By Geri' },
+            { id: 'pm3', time: '1545-1718', role: 'By Rehab' },
+          ],
+          '1.5 am': [
+            { id: 'am1', time: '0830-0945', role: 'To Rehab' },
+            { id: 'am2', time: '0945-1045', role: 'To Oncol' },
+            { id: 'am3', time: '1045-1200', role: 'To Geri' },
+            { id: 'pm1', time: '1300-1430', role: 'By Oncol' },
+            { id: 'pm2', time: '1430-1545', role: 'By Geri' },
+            { id: 'pm3', time: '1545-1718', role: 'By Rehab' },
+          ],
+          '1.5 pm': isFriday
+            ? [
+                { id: 'am1', time: '0830-0945', role: 'By Oncol' },
+                { id: 'am2', time: '0945-1045', role: 'By Rehab' },
+                { id: 'am3', time: '1045-1200', role: 'By Geri' },
+                { id: 'pm1', time: '1300-1430', role: 'To Rehab' },
+                { id: 'pm2', time: '1430-1545', role: 'To Oncol' },
+                { id: 'pm3', time: '1545-1718', role: 'To Geri' },
+              ]
+            : [
+                { id: 'am1', time: '0830-0945', role: 'By Oncol' },
+                { id: 'am2', time: '0945-1045', role: 'By Rehab' },
+                { id: 'am3', time: '1045-1200', role: 'By Geri' },
+                { id: 'pm1', time: '1300-1430', role: 'To Rehab' },
+                { id: 'pm2', time: '1430-1545', role: 'To Geri' },
+                { id: 'pm3', time: '1545-1718', role: 'To Oncol' },
+              ],
+          '2': isFriday
+            ? [
+                { id: 'am1', time: '0830-0945', role: 'To Rehab' },
+                { id: 'am2', time: '0945-1045', role: 'To Oncol' },
+                { id: 'am3', time: '1045-1200', role: 'To Geri' },
+                { id: 'pm1', time: '1300-1430', role: 'To Rehab' },
+                { id: 'pm2', time: '1430-1545', role: 'To Oncol' },
+                { id: 'pm3', time: '1545-1718', role: 'To Geri' },
+              ]
+            : [
+                { id: 'am1', time: '0830-0945', role: 'To Rehab' },
+                { id: 'am2', time: '0945-1045', role: 'To Oncol' },
+                { id: 'am3', time: '1045-1200', role: 'To Geri' },
+                { id: 'pm1', time: '1300-1430', role: 'To Rehab' },
+                { id: 'pm2', time: '1430-1545', role: 'To Geri' },
+                { id: 'pm3', time: '1545-1718', role: 'To Oncol' },
+              ],
+        };
+
+        return schedules[downLevel] || [];
+      }
+
+      function computeRelievingSlots() {
+        const level = state.downLevel;
+        if (level === '0') return [];
+
+        const rawSlots = getGronScheduleTable(level, state.weekday);
+        const isThuAllMeeting = state.weekday === 'Thursday' && state.thuActivity === 'all_meeting';
+
+        // Build team shortage map: { Onco: number, Rehab: number, Geri: number }
+        const downMap = { Onco: 0, Rehab: 0, Geri: 0 };
+        if (['0.5 am', '0.5 pm', '1'].includes(level)) {
+          const val = level === '1' ? 1 : 0.5;
+          downMap[state.downSingleTeam] = val;
+        } else if (['1.5 am', '1.5 pm'].includes(level)) {
+          downMap[state.down1Team] = 1;
+          downMap[state.down05Team] = 0.5;
+        } else if (level === '2') {
+          state.down2Teams.forEach((t) => {
+            downMap[t] = 1;
+          });
+        }
+
+        const oncoDown = downMap.Onco;
+
+        // Helper to determine which team sends a PCA to Onco during 'To Oncol'
+        const getHelperTeamForOnco = (preferred = 'Geri') => {
+          const fullTeams = ['Geri', 'Rehab'].filter((t) => downMap[t] === 0);
+          if (fullTeams.length === 1) return fullTeams[0];
+          if (fullTeams.includes(preferred)) return preferred;
+          return fullTeams[0] || 'Geri';
+        };
+
+        const activeSlots = [];
+
+        rawSlots.forEach((slot) => {
+          // Adjust Thursday PM times if All-Staff Meeting (13:00-14:00) is active
+          let baseTime = slot.time;
+          if (isThuAllMeeting) {
+            if (slot.id === 'pm1') baseTime = '1400-1500';
+            if (slot.id === 'pm2') baseTime = '1500-1600';
+            if (slot.id === 'pm3') baseTime = '1600-1718';
+          }
+
+          const override = state.slotOverrides[slot.id] || {};
+          const slotTime = override.time !== undefined ? override.time : baseTime;
+          const isDown15 = level === '1.5 am' || level === '1.5 pm';
+
+          if (isDown15) {
+            const down1Team = state.down1Team; // Team with 1.0 shortage
+            const down05Team = state.down05Team; // Team with 0.5 shortage
+            const fullTeam = ['Onco', 'Rehab', 'Geri'].find((t) => downMap[t] === 0) || 'Geri';
+
+            if (slot.role.startsWith('By ')) {
+              // "By X" slots always support the Down 1 team
+              const byTeam = slot.role === 'By Oncol' ? 'Onco' : slot.role.replace('By ', '');
+              if (byTeam === 'Onco') {
+                // Only relevant if Onco is NOT the Down 1 team and 2nd PCA is present
+                if (oncoDown < 1 && state.pca2.trim() !== '') {
+                  activeSlots.push({
+                    id: slot.id,
+                    type: 'outbound',
+                    roleLabel: slot.role,
+                    defaultTime: slot.time,
+                    time: slotTime,
+                    targetTeam: down1Team,
+                    defaultReturnWard: getDefaultReturnWard(slot.id, level, oncoDown),
+                    returnWard:
+                      override.returnWard !== undefined
+                        ? override.returnWard
+                        : getDefaultReturnWard(slot.id, level, oncoDown),
+                  });
+                }
+              } else {
+                // "By Rehab" / "By Geri": only relevant to Onco if Onco is the Down 1 team
+                if (down1Team === 'Onco') {
+                  activeSlots.push({
+                    id: slot.id,
+                    type: 'inbound',
+                    roleLabel: `${slot.role} -> To Oncol`,
+                    defaultTime: slot.time,
+                    time: slotTime,
+                    fromTeam: byTeam,
+                    ward: override.ward !== undefined ? override.ward : getDefaultInboundWard(slot.id),
+                  });
+                }
+              }
+            } else if (slot.role.startsWith('To ')) {
+              // "To Y" slots are provided by the Full team to help whichever team is down at that slot
+              const toTeam = slot.role === 'To Oncol' ? 'Onco' : slot.role.replace('To ', '');
+              if (fullTeam === 'Onco') {
+                // Onco is the Full team -> Onco's 2nd PCA goes out to support whichever team is down (Down 1 or Down 0.5)
+                if (state.pca2.trim() !== '' && downMap[toTeam] > 0) {
+                  activeSlots.push({
+                    id: slot.id,
+                    type: 'outbound',
+                    roleLabel: slot.role,
+                    defaultTime: slot.time,
+                    time: slotTime,
+                    targetTeam: toTeam,
+                    defaultReturnWard: getDefaultReturnWard(slot.id, level, oncoDown),
+                    returnWard:
+                      override.returnWard !== undefined
+                        ? override.returnWard
+                        : getDefaultReturnWard(slot.id, level, oncoDown),
+                  });
+                }
+              } else if (toTeam === 'Onco' && oncoDown > 0) {
+                // Onco is Down 0.5 or Down 1 -> Full team comes to support Onco at "To Oncol"
+                activeSlots.push({
+                  id: slot.id,
+                  type: 'inbound',
+                  roleLabel: 'To Oncol',
+                  defaultTime: slot.time,
+                  time: slotTime,
+                  fromTeam: fullTeam,
+                  ward: override.ward !== undefined ? override.ward : getDefaultInboundWard(slot.id),
+                });
+              }
+            }
+            return;
+          }
+
+          // Case 1: 'By Oncol' (Down 0.5 / Down 1) -> Onco sends 2nd PCA to help whichever team is down (if Onco has 2nd PCA)
+          if (slot.role === 'By Oncol') {
+            if (state.pca2.trim() !== '' && oncoDown < 1) {
+              let targetTeam = null;
+              if (downMap.Rehab > 0) targetTeam = 'Rehab';
+              else if (downMap.Geri > 0) targetTeam = 'Geri';
+
+              if (targetTeam) {
+                activeSlots.push({
+                  id: slot.id,
+                  type: 'outbound',
+                  roleLabel: slot.role,
+                  defaultTime: slot.time,
+                  time: slotTime,
+                  targetTeam,
+                  defaultReturnWard: getDefaultReturnWard(slot.id, level, oncoDown),
+                  returnWard:
+                    override.returnWard !== undefined
+                      ? override.returnWard
+                      : getDefaultReturnWard(slot.id, level, oncoDown),
+                });
+              }
+            }
+          }
+
+          // Case 2: 'By Rehab' / 'By Geri' -> Relevant ONLY when Onco itself has a shortage!
+          if (slot.role === 'By Rehab' || slot.role === 'By Geri') {
+            const sourceTeam = slot.role === 'By Rehab' ? 'Rehab' : 'Geri';
+            if (oncoDown > 0 && downMap[sourceTeam] === 0) {
+              activeSlots.push({
+                id: slot.id,
+                type: 'inbound', // Other team comes to Onco ('To Oncol' ward needed)
+                roleLabel: `${slot.role} -> To Oncol`,
+                defaultTime: slot.time,
+                time: slotTime,
+                fromTeam: sourceTeam,
+                ward: override.ward !== undefined ? override.ward : getDefaultInboundWard(slot.id),
+              });
+            }
+          }
+
+          // Case 3: 'To Rehab' / 'To Geri' -> Onco's 2nd PCA goes to Rehab/Geri if that team is down & Onco is full
+          if (slot.role === 'To Rehab' || slot.role === 'To Geri') {
+            const targetTeam = slot.role === 'To Rehab' ? 'Rehab' : 'Geri';
+            if (oncoDown === 0 && downMap[targetTeam] > 0 && state.pca2.trim() !== '') {
+              activeSlots.push({
+                id: slot.id,
+                type: 'outbound',
+                roleLabel: slot.role,
+                defaultTime: slot.time,
+                time: slotTime,
+                targetTeam,
+                defaultReturnWard: getDefaultReturnWard(slot.id, level, oncoDown),
+                returnWard:
+                  override.returnWard !== undefined
+                    ? override.returnWard
+                    : getDefaultReturnWard(slot.id, level, oncoDown),
+              });
+            }
+          }
+
+          // Case 4: 'To Oncol' -> Relevant when Onco has a shortage (Down 2)
+          if (slot.role === 'To Oncol') {
+            if (oncoDown > 0) {
+              const fromTeam = getHelperTeamForOnco('Geri');
+              activeSlots.push({
+                id: slot.id,
+                type: 'inbound',
+                roleLabel: 'To Oncol',
+                defaultTime: slot.time,
+                time: slotTime,
+                fromTeam,
+                ward: override.ward !== undefined ? override.ward : getDefaultInboundWard(slot.id),
+              });
+            }
+          }
+        });
+
+        return activeSlots;
+      }
+
+      /**
+       * Determines the smart default return ward (回XX) for Onco's 2nd PCA
+       * matching the exact sample rules:
+       * - 0830-0945 -> 回6B
+       * - 1300-1430 / 1400-1500 -> blank if continuing relief at 1430-1545 (e.g. Down 1.5 pm), else 回7A
+       * - 1430-1545 / 1500-1600 -> 回2DM
+       */
+      function getDefaultReturnWard(slotId, downLevel, oncoDown) {
+        if (slotId === 'am1') return '6B';
+        if (slotId === 'am3') return '';
+        if (slotId === 'pm1') {
+          // If 2nd PCA also relieves in pm2 (which happens when Down 1.5 pm or Down 2 and Onco is full), no return ward needed yet
+          if ((downLevel === '1.5 pm' || downLevel === '2') && oncoDown === 0) {
+            return '';
+          }
+          return '7A';
+        }
+        if (slotId === 'pm2') return '2DM';
+        return '';
+      }
+
+      function getDefaultInboundWard(slotId) {
+        if (slotId.startsWith('am')) return '6B';
+        if (slotId === 'pm1') return '7A';
+        return '3EON';
+      }
+
+      // =========================================================================
+      // WHATSAPP MESSAGE GENERATOR
+      // =========================================================================
+      function buildWhatsAppMessages() {
+        const dateHeader = `<${formatDisplayDate(state.dateStr)}>`;
+        const downSuffix = state.downLevel !== '0' ? ` Down ${state.downLevel}` : '';
+        const firstLine = `${dateHeader}${downSuffix}`;
+
+        const pca1 = state.pca1.trim() || '1st PCA';
+        const pca2 = state.pca2.trim();
+        const isThuAllMeeting = state.weekday === 'Thursday' && state.thuActivity === 'all_meeting';
+        const isThuInservice = state.weekday === 'Thursday' && state.thuActivity === 'inservice';
+
+        // Compute GROn relieving slots up front so we know if 2nd PCA is relieving at 13:00
+        const relievingSlots = computeRelievingSlots();
+        const hasPca2Outbound1300 =
+          Boolean(pca2) &&
+          relievingSlots.some(
+            (slot) =>
+              slot.type === 'outbound' &&
+              (slot.id === 'pm1' || (slot.time || '').startsWith('1300') || (slot.time || '').startsWith('1400'))
+          );
+
+        // Collect chronological entries for Whole Workflow
+        // Each entry: { sortKey: number, text: string }
+        const wholeEntries = [];
+        const pca1Entries = [];
+        const pca2Entries = [];
+        const generalPcaNotes = [];
+
+        const parseStartMinutes = (timeRange) => {
+          const clean = (timeRange || '').replace(/[^0-9]/g, '');
+          if (clean.length >= 4) {
+            const hh = parseInt(clean.slice(0, 2), 10);
+            const mm = parseInt(clean.slice(2, 4), 10);
+            return hh * 60 + mm;
+          }
+          return 9999;
+        };
+
+        // 1. Weekday Routine Special Events for 1st PCA (and Thursday 2nd PCA ward override)
+        if (state.weekday === 'Monday') {
+          const ret = state.mondayReturnWard || '4B';
+          const line = `1300-1415 ${pca1}: PRP class -> 回${ret}`;
+          wholeEntries.push({ sortKey: 13 * 60 + 1, text: line });
+          pca1Entries.push({ sortKey: 13 * 60 + 1, text: `1300-1415 PRP class -> 回${ret}` });
+        } else if (state.weekday === 'Wednesday') {
+          const line = `0830-1015 ${pca1}: PRP class -> 回6B`;
+          wholeEntries.push({ sortKey: 8 * 60 + 30, text: line });
+          pca1Entries.push({ sortKey: 8 * 60 + 30, text: `0830-1015 PRP class -> 回6B` });
+        } else if (state.weekday === 'Thursday') {
+          // AM Hospice Day
+          const hospiceLine = `1030-1200 ${pca1}: Hospice Day`;
+          wholeEntries.push({ sortKey: 10 * 60 + 30, text: hospiceLine });
+          pca1Entries.push({ sortKey: 10 * 60 + 30, text: `1030-1200 Hospice Day` });
+
+          const afterWard = (state.thuAfterTaskWard || '').trim() || '4B';
+          const pca2Ward = (state.thuPca2AfterWard || '').trim();
+
+          // 1300-1400 Departmental Activity
+          if (isThuAllMeeting) {
+            wholeEntries.push({ sortKey: 13 * 60, text: `1300-1400 全部人開會` });
+            generalPcaNotes.push(`1300-1400 全部人開會`);
+
+            // If Clean Room 11 and/or OSH are checked after All-Staff Meeting
+            if (state.cleanRoom11 || state.checkOsh) {
+              let taskDesc = '';
+              if (state.cleanRoom11 && state.checkOsh) {
+                taskDesc = '完Meeting 先清潔11房+OSH';
+              } else if (state.cleanRoom11) {
+                taskDesc = '完Meeting 先清潔11房';
+              } else {
+                taskDesc = '完Meeting 先check OSH';
+              }
+              wholeEntries.push({ sortKey: 14 * 60, text: `1400 ${pca1}: ${taskDesc} -> ${afterWard}` });
+              pca1Entries.push({ sortKey: 14 * 60, text: `1400 ${taskDesc} -> ${afterWard}` });
+            }
+
+            // 2nd PCA ward after meeting (unless overridden by GROn relieving)
+            if (pca2 && pca2Ward && !hasPca2Outbound1300) {
+              wholeEntries.push({ sortKey: 14 * 60 + 1, text: `1400 ${pca2}: 完Meeting 去${pca2Ward}` });
+              pca2Entries.push({ sortKey: 14 * 60 + 1, text: `1400 完Meeting 去${pca2Ward}` });
+            }
+          } else if (isThuInservice) {
+            wholeEntries.push({ sortKey: 13 * 60, text: `1300-1400 PT 開會` });
+            generalPcaNotes.push(`1300-1400 PT 開會`);
+
+            // 1st PCA 1300-1400 duty (Room 11 / OSH / target ward)
+            if (state.cleanRoom11 && state.checkOsh) {
+              wholeEntries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 ${pca1}: 清潔11房 + OSH -> ${afterWard}` });
+              pca1Entries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 清潔11房 + OSH -> ${afterWard}` });
+            } else if (state.cleanRoom11) {
+              wholeEntries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 ${pca1}: 清潔11房 -> ${afterWard}` });
+              pca1Entries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 清潔11房 -> ${afterWard}` });
+            } else if (state.checkOsh) {
+              wholeEntries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 ${pca1}: check OSH -> ${afterWard}` });
+              pca1Entries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 check OSH -> ${afterWard}` });
+            } else if ((state.thuAfterTaskWard || '').trim()) {
+              wholeEntries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 ${pca1}: 去${afterWard}` });
+              pca1Entries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 去${afterWard}` });
+            }
+
+            // 2nd PCA 1300-1400 ward (unless overridden by GROn relieving from 1300)
+            if (pca2 && pca2Ward && !hasPca2Outbound1300) {
+              wholeEntries.push({ sortKey: 13 * 60 + 2, text: `1300-1400 ${pca2}: 去${pca2Ward}` });
+              pca2Entries.push({ sortKey: 13 * 60 + 2, text: `1300-1400 去${pca2Ward}` });
+            }
+          } else {
+            // No activity on Thursday: show 1st PCA selected ward / Room 11 / OSH
+            let taskDesc = '';
+            if (state.cleanRoom11 && state.checkOsh) {
+              taskDesc = `清潔11房 + OSH -> ${afterWard}`;
+            } else if (state.cleanRoom11) {
+              taskDesc = `清潔11房 -> ${afterWard}`;
+            } else if (state.checkOsh) {
+              taskDesc = `check OSH -> ${afterWard}`;
+            } else if ((state.thuAfterTaskWard || '').trim()) {
+              taskDesc = `去${afterWard}`;
+            }
+
+            if (taskDesc) {
+              wholeEntries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 ${pca1}: ${taskDesc}` });
+              pca1Entries.push({ sortKey: 13 * 60 + 1, text: `1300-1400 ${taskDesc}` });
+            }
+
+            // 2nd PCA 1300-1400 ward (unless overridden by GROn relieving from 1300)
+            if (pca2 && pca2Ward && !hasPca2Outbound1300) {
+              wholeEntries.push({ sortKey: 13 * 60 + 2, text: `1300-1400 ${pca2}: 去${pca2Ward}` });
+              pca2Entries.push({ sortKey: 13 * 60 + 2, text: `1300-1400 去${pca2Ward}` });
+            }
+          }
+        } else if (state.weekday === 'Friday') {
+          const line = `1430-1600 ${pca1}: Hospice Day`;
+          wholeEntries.push({ sortKey: 14 * 60 + 30, text: line });
+          pca1Entries.push({ sortKey: 14 * 60 + 30, text: `1430-1600 Hospice Day` });
+        }
+
+        // 2. Routine Support From Other Teams
+        if (['Monday', 'Wednesday', 'Thursday'].includes(state.weekday)) {
+          if (!isThuAllMeeting) {
+            const w1 = state.support.opd1.trim();
+            const w2 = state.support.opd2.trim();
+            if (w1 || w2) {
+              let opdText = '';
+              if (w1 && w2 && w1.toUpperCase() === w2.toUpperCase()) {
+                opdText = `1300-1400 OPD #1 & #2: 去 ${w1}`;
+              } else if (w1 && w2) {
+                opdText = `1300-1400 OPD #1 去 ${w1} | #2 去 ${w2}`;
+              } else if (w1) {
+                opdText = `1300-1400 OPD #1 去 ${w1}`;
+              } else {
+                opdText = `1300-1400 OPD #2 去 ${w2}`;
+              }
+              // On Thursday inservice, place OPD right after 1st PCA 1300-1400 line (matching Condition 2 & 4)
+              const sortPos = state.weekday === 'Thursday' ? 13 * 60 + 3 : 13 * 60;
+              wholeEntries.push({ sortKey: sortPos, text: opdText });
+            }
+          }
+        } else if (state.weekday === 'Tuesday') {
+          const rWard = state.support.rehab1300.trim();
+          const oWard = state.support.opd1615.trim();
+          if (rWard) {
+            wholeEntries.push({ sortKey: 13 * 60, text: `1300-1400 Rehab去${rWard}` });
+          }
+          if (oWard) {
+            wholeEntries.push({ sortKey: 16 * 60 + 15, text: `1615-1718 OPD去${oWard}` });
+          }
+        } else if (state.weekday === 'Friday') {
+          const orthoWard = state.support.ortho1300.trim();
+          const opdWard = state.support.opd1615.trim();
+          if (orthoWard) {
+            wholeEntries.push({ sortKey: 13 * 60, text: `1300-1400 Ortho去${orthoWard}` });
+          }
+          if (opdWard) {
+            wholeEntries.push({ sortKey: 16 * 60 + 15, text: `1615-1718 OPD去${opdWard}` });
+          }
+        }
+
+        // 3. GROn Relieving Slots
+        relievingSlots.forEach((slot) => {
+          const startMins = parseStartMinutes(slot.time);
+          if (slot.type === 'outbound' && pca2) {
+            // 2nd PCA goes to Geri/Rehab
+            const spaceBeforeTeam = slot.targetTeam === 'Geri' ? ' ' : '';
+            const retPart = slot.returnWard && slot.returnWard.trim() ? ` -> 回${slot.returnWard.trim()}` : '';
+            const wholeLine = `${slot.time} ${pca2}: 去${spaceBeforeTeam}${slot.targetTeam}${retPart}`;
+            const pcaLine = `${slot.time} 去${spaceBeforeTeam}${slot.targetTeam}${retPart}`;
+            wholeEntries.push({ sortKey: startMins + 2, text: wholeLine });
+            pca2Entries.push({ sortKey: startMins + 2, text: pcaLine });
+          } else if (slot.type === 'inbound') {
+            // Other team sends PCA to Onco ward
+            const targetWard = (slot.ward || '').trim() || '6B';
+            const wholeLine = `${slot.time} ${slot.fromTeam}去${targetWard}`;
+            wholeEntries.push({ sortKey: startMins, text: wholeLine });
+          }
+        });
+
+        // Sort chronologically
+        wholeEntries.sort((a, b) => a.sortKey - b.sortKey);
+        pca1Entries.sort((a, b) => a.sortKey - b.sortKey);
+        pca2Entries.sort((a, b) => a.sortKey - b.sortKey);
+
+        // Build Message 1: Whole Workflow
+        const wholeLines = [firstLine, ...wholeEntries.map((e) => e.text)];
+        if (wholeEntries.length === 0) {
+          wholeLines.push('如常運作 (Normal routine workflow)');
+        }
+
+        // Build Message 2: PCA Reference
+        const refLines = [firstLine];
+        generalPcaNotes.forEach((n) => refLines.push(n));
+
+        if (pca1Entries.length > 0) {
+          refLines.push(`*${pca1}:*`);
+          pca1Entries.forEach((e) => refLines.push(e.text));
+        }
+
+        if (pca2 && pca2Entries.length > 0) {
+          refLines.push(`*${pca2}:*`);
+          pca2Entries.forEach((e) => refLines.push(e.text));
+        }
+
+        if (generalPcaNotes.length === 0 && pca1Entries.length === 0 && pca2Entries.length === 0) {
+          refLines.push('如常運作 (Normal routine workflow)');
+        }
+
+        return {
+          wholeMessage: wholeLines.join('\n'),
+          pcaMessage: refLines.join('\n'),
+        };
+      }
+
+      // =========================================================================
+      // UI RENDERING
+      // =========================================================================
+      function renderAll() {
+        // 1. Date & Weekday
+        document.getElementById('dutyDate').value = state.dateStr;
+        document.getElementById('formattedDateTag').textContent = `<${formatDisplayDate(state.dateStr)}>`;
+
+        document.querySelectorAll('.day-btn').forEach((btn) => {
+          const isActive = btn.dataset.day === state.weekday;
+          btn.className = isActive
+            ? 'day-btn py-2.5 rounded-xl text-xs font-bold border border-clinical-700 bg-clinical-700 text-white shadow-xs transition'
+            : 'day-btn py-2.5 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+        });
+
+        // 2. Onco Team Manpower
+        document.getElementById('pca1Input').value = state.pca1;
+        document.getElementById('pca2Input').value = state.pca2;
+
+        const statusPill = document.getElementById('oncoStatusPill');
+        const isOncoDown05 =
+          (['0.5 am', '0.5 pm'].includes(state.downLevel) && state.downSingleTeam === 'Onco') ||
+          (['1.5 am', '1.5 pm'].includes(state.downLevel) && state.down05Team === 'Onco');
+
+        if (state.pca2.trim() === '') {
+          statusPill.textContent = 'Onco Down 1 (2nd PCA Blank)';
+          statusPill.className =
+            'text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200';
+        } else if (isOncoDown05) {
+          const period = state.downLevel.includes('am') ? 'AM' : 'PM';
+          statusPill.textContent = `Onco Down 0.5 (${period})`;
+          statusPill.className =
+            'text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200';
+        } else {
+          statusPill.textContent = 'Full Team (2 PCAs) / Down 0.5';
+          statusPill.className =
+            'text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+        }
+
+        // Monday extra PRP return ward
+        const monExtra = document.getElementById('mondayExtraContainer');
+        if (state.weekday === 'Monday') {
+          monExtra.classList.remove('hidden');
+          document.querySelectorAll('.mon-ward-btn').forEach((btn) => {
+            const active = btn.dataset.monWard === state.mondayReturnWard;
+            btn.className = active
+              ? 'mon-ward-btn px-3 py-1 rounded-lg text-xs font-bold border border-clinical-700 bg-clinical-700 text-white transition'
+              : 'mon-ward-btn px-3 py-1 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition';
+          });
+        } else {
+          monExtra.classList.add('hidden');
+        }
+
+        // 3. Thursday Section
+        const thuSection = document.getElementById('thursdaySection');
+        const thuRoom11Box = document.getElementById('thuRoom11Box');
+        const thuPca2WardRow = document.getElementById('thuPca2WardRow');
+        if (state.weekday === 'Thursday') {
+          thuSection.classList.remove('hidden');
+          document.querySelectorAll('input[name="thuActivity"]').forEach((radio) => {
+            radio.checked = radio.value === state.thuActivity;
+          });
+          thuRoom11Box.classList.remove('hidden');
+          document.getElementById('chkCleanRoom11').checked = state.cleanRoom11;
+          document.getElementById('chkCheckOsh').checked = state.checkOsh;
+          const afterWardInput = document.getElementById('thuAfterTaskWard');
+          if (afterWardInput) {
+            afterWardInput.value = state.thuAfterTaskWard;
+          }
+          document.querySelectorAll('.thu-ward-chip').forEach((btn) => {
+            const active = (state.thuAfterTaskWard || '').toUpperCase() === btn.dataset.thuWard;
+            btn.className = active
+              ? 'thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-clinical-700 bg-clinical-700 text-white transition'
+              : 'thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+          });
+
+          if (state.pca2.trim() !== '') {
+            thuPca2WardRow.classList.remove('hidden');
+            const pca2AfterInput = document.getElementById('thuPca2AfterWard');
+            if (pca2AfterInput) {
+              pca2AfterInput.value = state.thuPca2AfterWard;
+            }
+            document.querySelectorAll('.thu-pca2-ward-chip').forEach((btn) => {
+              const active = (state.thuPca2AfterWard || '').toUpperCase() === btn.dataset.thuPca2Ward;
+              btn.className = active
+                ? 'thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-clinical-700 bg-clinical-700 text-white transition'
+                : 'thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+            });
+          } else {
+            thuPca2WardRow.classList.add('hidden');
+          }
+        } else {
+          thuSection.classList.add('hidden');
+        }
+
+        // 4. Routine Support From Other Teams
+        renderSupportSection();
+
+        // 5. GROn Relieving Section
+        renderGronSection();
+
+        // 6. Live WhatsApp Preview
+        const { wholeMessage, pcaMessage } = buildWhatsAppMessages();
+        document.getElementById('msgWholeWorkflow').value = wholeMessage;
+        document.getElementById('msgPcaReference').value = pcaMessage;
+      }
+
+      function renderSupportSection() {
+        const badge = document.getElementById('supportDayBadge');
+        const dissolvedNotice = document.getElementById('supportDissolvedNotice');
+        const container = document.getElementById('supportInputsContainer');
+        const isThuAllMeeting = state.weekday === 'Thursday' && state.thuActivity === 'all_meeting';
+
+        badge.textContent = `${state.weekday} Support`;
+
+        if (isThuAllMeeting) {
+          dissolvedNotice.classList.remove('hidden');
+          container.innerHTML = '';
+          return;
+        } else {
+          dissolvedNotice.classList.add('hidden');
+        }
+
+        if (['Monday', 'Wednesday', 'Thursday'].includes(state.weekday)) {
+          container.innerHTML = `
+            ${renderWardRowHtml('OPD PCA #1 (13:00–14:00)', 'opd1', state.support.opd1)}
+            ${renderWardRowHtml('OPD PCA #2 (13:00–14:00)', 'opd2', state.support.opd2)}
+          `;
+        } else if (state.weekday === 'Tuesday') {
+          container.innerHTML = `
+            ${renderWardRowHtml('Rehab PCA (13:00–14:00)', 'rehab1300', state.support.rehab1300)}
+            ${renderWardRowHtml('OPD PCA (16:15–17:18)', 'opd1615', state.support.opd1615)}
+          `;
+        } else if (state.weekday === 'Friday') {
+          container.innerHTML = `
+            ${renderWardRowHtml('Ortho PCA (13:00–14:00)', 'ortho1300', state.support.ortho1300)}
+            ${renderWardRowHtml('OPD PCA (16:15–17:18)', 'opd1615', state.support.opd1615)}
+          `;
+        }
+
+        // Bind listeners for support inputs and quick chips
+        container.querySelectorAll('.support-ward-input').forEach((inp) => {
+          inp.addEventListener('input', (e) => {
+            state.support[e.target.dataset.key] = e.target.value;
+            updateLiveMessagesOnly();
+          });
+        });
+
+        container.querySelectorAll('.support-chip-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const key = e.target.dataset.key;
+            const ward = e.target.dataset.ward;
+            state.support[key] = ward;
+            renderAll();
+          });
+        });
+      }
+
+      function renderWardRowHtml(label, key, currentVal) {
+        const chips = COMMON_WARDS.map((w) => {
+          const active = (currentVal || '').toUpperCase() === w;
+          return `<button type="button" data-key="${key}" data-ward="${w}"
+            class="support-chip-btn px-2.5 py-1 rounded-lg text-xs font-bold border transition ${
+              active
+                ? 'bg-clinical-700 text-white border-clinical-700'
+                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+            }">${w}</button>`;
+        }).join('');
+
+        return `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+            <span class="text-xs sm:text-sm font-semibold text-slate-800">${label}</span>
+            <div class="flex flex-wrap items-center gap-1.5">
+              <div class="flex items-center gap-1">${chips}</div>
+              <input type="text" data-key="${key}" value="${escapeHtml(currentVal)}" placeholder="Ward"
+                class="support-ward-input w-20 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-800 uppercase focus:outline-none focus:ring-2 focus:ring-clinical-600" />
+            </div>
+          </div>
+        `;
+      }
+
+      function renderGronSection() {
+        document.getElementById('downSummaryBadge').textContent =
+          state.downLevel === '0' ? 'Down 0 (No Shortage)' : `Down ${state.downLevel}`;
+
+        document.querySelectorAll('.down-btn').forEach((btn) => {
+          const active = btn.dataset.down === state.downLevel;
+          btn.className = active
+            ? 'down-btn py-2 px-1 rounded-xl text-xs font-bold border border-rose-600 bg-rose-600 text-white shadow-xs transition'
+            : 'down-btn py-2 px-1 rounded-xl text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
+        });
+
+        const breakdownBox = document.getElementById('shortageBreakdownContainer');
+        const slotsBox = document.getElementById('relievingSlotsContainer');
+
+        if (state.downLevel === '0') {
+          breakdownBox.classList.add('hidden');
+          slotsBox.innerHTML = `
+            <div class="text-xs text-slate-500 bg-slate-50 rounded-xl p-3 border border-slate-200/70">
+              All GROn teams (Geri, Rehab, Onco) have full manpower. No cross-team relieving required.
+            </div>
+          `;
+          return;
+        }
+
+        breakdownBox.classList.remove('hidden');
+
+        // Render team selection controls depending on Down level
+        if (['0.5 am', '0.5 pm', '1'].includes(state.downLevel)) {
+          breakdownBox.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-slate-700">Which team has the shortage (${state.downLevel})?</span>
+              <div class="flex items-center gap-1.5">
+                ${['Onco', 'Rehab', 'Geri']
+                  .map((team) => {
+                    const active = state.downSingleTeam === team;
+                    return `<button type="button" data-single-team="${team}"
+                      class="single-team-btn px-3.5 py-1.5 rounded-xl text-xs font-bold border transition ${
+                        active
+                          ? 'bg-rose-600 text-white border-rose-600'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                      }">${team}</button>`;
+                  })
+                  .join('')}
+              </div>
+            </div>
+          `;
+
+          breakdownBox.querySelectorAll('.single-team-btn').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              state.downSingleTeam = e.target.dataset.singleTeam;
+              state.slotOverrides = {};
+              renderAll();
+            });
+          });
+        } else if (['1.5 am', '1.5 pm'].includes(state.downLevel)) {
+          breakdownBox.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <span class="block text-xs font-bold text-slate-700 mb-1.5">Team Down 1:</span>
+                <div class="flex gap-1.5">
+                  ${['Onco', 'Rehab', 'Geri']
+                    .map((team) => {
+                      const active = state.down1Team === team;
+                      return `<button type="button" data-down1-team="${team}"
+                        class="down1-team-btn flex-1 py-1.5 rounded-xl text-xs font-bold border transition ${
+                          active
+                            ? 'bg-rose-600 text-white border-rose-600'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                        }">${team}</button>`;
+                    })
+                    .join('')}
+                </div>
+              </div>
+              <div>
+                <span class="block text-xs font-bold text-slate-700 mb-1.5">Team Down 0.5:</span>
+                <div class="flex gap-1.5">
+                  ${['Onco', 'Rehab', 'Geri']
+                    .map((team) => {
+                      const active = state.down05Team === team;
+                      return `<button type="button" data-down05-team="${team}"
+                        class="down05-team-btn flex-1 py-1.5 rounded-xl text-xs font-bold border transition ${
+                          active
+                            ? 'bg-amber-600 text-white border-amber-600'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                        }">${team}</button>`;
+                    })
+                    .join('')}
+                </div>
+              </div>
+            </div>
+          `;
+
+          breakdownBox.querySelectorAll('.down1-team-btn').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              const chosen = e.target.dataset.down1Team;
+              state.down1Team = chosen;
+              if (state.down05Team === chosen) {
+                state.down05Team = ['Rehab', 'Geri', 'Onco'].find((t) => t !== chosen);
+              }
+              state.slotOverrides = {};
+              renderAll();
+            });
+          });
+
+          breakdownBox.querySelectorAll('.down05-team-btn').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              const chosen = e.target.dataset.down05Team;
+              state.down05Team = chosen;
+              if (state.down1Team === chosen) {
+                state.down1Team = ['Rehab', 'Geri', 'Onco'].find((t) => t !== chosen);
+              }
+              state.slotOverrides = {};
+              renderAll();
+            });
+          });
+        } else if (state.downLevel === '2') {
+          breakdownBox.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-xs font-bold text-slate-700">Select the 2 teams that are Down 1 each:</span>
+              <div class="flex items-center gap-1.5">
+                ${['Onco', 'Rehab', 'Geri']
+                  .map((team) => {
+                    const active = state.down2Teams.includes(team);
+                    return `<button type="button" data-down2-team="${team}"
+                      class="down2-team-btn px-3.5 py-1.5 rounded-xl text-xs font-bold border transition ${
+                        active
+                          ? 'bg-rose-600 text-white border-rose-600'
+                          : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'
+                      }">${team} ${active ? '(Down 1)' : ''}</button>`;
+                  })
+                  .join('')}
+              </div>
+            </div>
+          `;
+
+          breakdownBox.querySelectorAll('.down2-team-btn').forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              const team = e.target.dataset.down2Team;
+              if (state.down2Teams.includes(team)) {
+                if (state.down2Teams.length > 1) {
+                  state.down2Teams = state.down2Teams.filter((t) => t !== team);
+                }
+              } else {
+                if (state.down2Teams.length >= 2) {
+                  state.down2Teams.shift();
+                }
+                state.down2Teams.push(team);
+              }
+              state.slotOverrides = {};
+              renderAll();
+            });
+          });
+        }
+
+        // Render active relieving slots preview & interactive ward inputs
+        const activeSlots = computeRelievingSlots();
+        if (activeSlots.length === 0) {
+          slotsBox.innerHTML = `
+            <div class="text-xs text-amber-800 bg-amber-50 rounded-xl p-3 border border-amber-200">
+              No active relieving slot applies to Onco under this selection (check if 2nd PCA is blank or verify down teams).
+            </div>
+          `;
+          return;
+        }
+
+        slotsBox.innerHTML = `
+          <div class="text-xs font-bold text-slate-700 uppercase tracking-wider pt-1">
+            Active Relieving Slots (Editable Time &amp; Target/Return Ward):
+          </div>
+          <div class="space-y-2">
+            ${activeSlots
+              .map((slot) => {
+                if (slot.type === 'outbound') {
+                  return `
+                    <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded bg-indigo-600 text-white">${slot.roleLabel}</span>
+                        <input type="text" data-slot-id="${slot.id}" data-field="time" value="${escapeHtml(slot.time)}"
+                          class="slot-edit-input w-24 rounded-lg border border-indigo-300 bg-white px-2 py-1 text-xs font-mono font-bold text-slate-800" />
+                        <span class="text-xs font-bold text-indigo-950">
+                          ${escapeHtml(state.pca2 || '2nd PCA')} -> 去 ${slot.targetTeam}
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-semibold text-slate-600">Return (回):</span>
+                        <input type="text" data-slot-id="${slot.id}" data-field="returnWard" value="${escapeHtml(slot.returnWard)}" placeholder="None"
+                          class="slot-edit-input w-20 rounded-lg border border-indigo-300 bg-white px-2 py-1 text-xs font-bold text-slate-800 uppercase" />
+                      </div>
+                    </div>
+                  `;
+                } else {
+                  const wardChips = COMMON_WARDS.map((w) => {
+                    const active = (slot.ward || '').toUpperCase() === w;
+                    return `<button type="button" data-slot-id="${slot.id}" data-ward="${w}"
+                      class="slot-ward-chip px-2 py-0.5 rounded text-[11px] font-bold border transition ${
+                        active
+                          ? 'bg-emerald-700 text-white border-emerald-700'
+                          : 'bg-white text-slate-600 border-emerald-200 hover:bg-emerald-100'
+                      }">${w}</button>`;
+                  }).join('');
+
+                  return `
+                    <div class="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[11px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-700 text-white">${slot.roleLabel}</span>
+                        <input type="text" data-slot-id="${slot.id}" data-field="time" value="${escapeHtml(slot.time)}"
+                          class="slot-edit-input w-24 rounded-lg border border-emerald-300 bg-white px-2 py-1 text-xs font-mono font-bold text-slate-800" />
+                        <span class="text-xs font-bold text-emerald-950">
+                          ${slot.fromTeam} -> Onco Ward:
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1 flex-wrap">
+                        ${wardChips}
+                        <input type="text" data-slot-id="${slot.id}" data-field="ward" value="${escapeHtml(slot.ward)}" placeholder="Ward"
+                          class="slot-edit-input w-16 rounded-lg border border-emerald-300 bg-white px-2 py-1 text-xs font-bold text-slate-800 uppercase" />
+                      </div>
+                    </div>
+                  `;
+                }
+              })
+              .join('')}
+          </div>
+        `;
+
+        // Bind listeners for slot overrides
+        slotsBox.querySelectorAll('.slot-edit-input').forEach((inp) => {
+          inp.addEventListener('input', (e) => {
+            const slotId = e.target.dataset.slotId;
+            const field = e.target.dataset.field;
+            if (!state.slotOverrides[slotId]) state.slotOverrides[slotId] = {};
+            state.slotOverrides[slotId][field] = e.target.value;
+            updateLiveMessagesOnly();
+          });
+        });
+
+        slotsBox.querySelectorAll('.slot-ward-chip').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const slotId = e.target.dataset.slotId;
+            const ward = e.target.dataset.ward;
+            if (!state.slotOverrides[slotId]) state.slotOverrides[slotId] = {};
+            state.slotOverrides[slotId].ward = ward;
+            renderAll();
+          });
+        });
+      }
+
+      function updateLiveMessagesOnly() {
+        const { wholeMessage, pcaMessage } = buildWhatsAppMessages();
+        document.getElementById('msgWholeWorkflow').value = wholeMessage;
+        document.getElementById('msgPcaReference').value = pcaMessage;
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      // =========================================================================
+      // 7-DAY HISTORY STORAGE (localStorage)
+      // =========================================================================
+      function loadHistory() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          // Prune records older than RETENTION_DAYS (10 days -> safely covers 7+ working days)
+          const cutoff = Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000;
+          const valid = parsed.filter((item) => item && item.savedAt >= cutoff);
+          if (valid.length !== parsed.length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(valid));
+          }
+          return valid;
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveCurrentWorkflowToHistory() {
+        const wholeMessage = document.getElementById('msgWholeWorkflow').value.trim();
+        const pcaMessage = document.getElementById('msgPcaReference').value.trim();
+
+        const record = {
+          id: `${state.dateStr}_${Date.now()}`,
+          savedAt: Date.now(),
+          dateStr: state.dateStr,
+          displayDate: formatDisplayDate(state.dateStr),
+          weekday: state.weekday,
+          downLevel: state.downLevel,
+          pca1: state.pca1,
+          pca2: state.pca2,
+          wholeMessage,
+          pcaMessage,
+          snapshot: JSON.parse(JSON.stringify(state)),
+        };
+
+        const history = loadHistory();
+        // Replace existing entry for the exact same date if user updates today's arrangement, or prepend
+        const filtered = history.filter((item) => item.dateStr !== state.dateStr);
+        filtered.unshift(record);
+
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+        } catch (err) {
+          showToast('Storage quota full — unable to save history.', true);
+        }
+
+        updateHistoryBadge();
+      }
+
+      function updateHistoryBadge() {
+        const list = loadHistory();
+        document.getElementById('historyCountBadge').textContent = list.length;
+      }
+
+      function renderHistoryModal() {
+        const list = loadHistory();
+        const container = document.getElementById('historyListContainer');
+
+        if (list.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-12 px-4">
+              <p class="text-sm font-semibold text-slate-600">No saved workflows in the last 7 days.</p>
+              <p class="text-xs text-slate-400 mt-1">Click "Arrange Workflow &amp; Save to 7-Day Log" to record today's schedule.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = list
+          .map((item) => {
+            const savedDateObj = new Date(item.savedAt);
+            const savedTimeStr = savedDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const downTag = item.downLevel !== '0' ? `Down ${item.downLevel}` : 'Full Staff';
+            const downColor =
+              item.downLevel !== '0'
+                ? 'bg-rose-100 text-rose-800 border-rose-200'
+                : 'bg-emerald-100 text-emerald-800 border-emerald-200';
+
+            return `
+              <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-sm text-slate-900">${escapeHtml(item.displayDate)} (${escapeHtml(item.weekday)})</span>
+                      <span class="text-[11px] font-bold px-2 py-0.5 rounded-full border ${downColor}">${escapeHtml(downTag)}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">
+                      1st PCA: ${escapeHtml(item.pca1 || '-')} &bull; 2nd PCA: ${escapeHtml(item.pca2 || 'Blank')} &bull; Saved ${savedTimeStr}
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" data-load-id="${item.id}"
+                      class="hist-load-btn px-2.5 py-1.5 rounded-lg bg-clinical-50 hover:bg-clinical-100 text-clinical-800 border border-clinical-200 text-xs font-bold transition">
+                      Load &amp; Edit
+                    </button>
+                    <button type="button" data-del-id="${item.id}"
+                      class="hist-del-btn px-2 py-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 text-xs font-bold transition" title="Delete entry">
+                      &times;
+                    </button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/80 flex flex-col justify-between">
+                    <pre class="font-mono text-[11px] text-slate-800 whitespace-pre-wrap leading-relaxed mb-2">${escapeHtml(item.wholeMessage)}</pre>
+                    <button type="button" data-copy-whole="${item.id}"
+                      class="hist-copy-whole-btn w-full py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] transition">
+                      Copy Whole Workflow
+                    </button>
+                  </div>
+                  <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/80 flex flex-col justify-between">
+                    <pre class="font-mono text-[11px] text-slate-800 whitespace-pre-wrap leading-relaxed mb-2">${escapeHtml(item.pcaMessage)}</pre>
+                    <button type="button" data-copy-pca="${item.id}"
+                      class="hist-copy-pca-btn w-full py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-[11px] transition">
+                      Copy PCA Reference
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+
+        // Bind modal item buttons
+        container.querySelectorAll('.hist-copy-whole-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const found = list.find((i) => i.id === e.target.dataset.copyWhole);
+            if (found) copyTextToClipboard(found.wholeMessage);
+          });
+        });
+
+        container.querySelectorAll('.hist-copy-pca-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const found = list.find((i) => i.id === e.target.dataset.copyPca);
+            if (found) copyTextToClipboard(found.pcaMessage);
+          });
+        });
+
+        container.querySelectorAll('.hist-load-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const found = list.find((i) => i.id === e.target.dataset.loadId);
+            if (found && found.snapshot) {
+              state = JSON.parse(JSON.stringify(found.snapshot));
+              renderAll();
+              document.getElementById('historyModal').classList.add('hidden');
+              showToast(`Loaded ${found.displayDate} (${found.weekday}) into editor.`);
+            }
+          });
+        });
+
+        container.querySelectorAll('.hist-del-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const id = e.target.dataset.delId;
+            const updated = loadHistory().filter((i) => i.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+            updateHistoryBadge();
+            renderHistoryModal();
+            showToast('Removed entry from log.');
+          });
+        });
+      }
+
+      // =========================================================================
+      // EVENT LISTENERS & INITIALIZATION
+      // =========================================================================
+      function initEventListeners() {
+        // Date picker
+        document.getElementById('dutyDate').addEventListener('change', (e) => {
+          state.dateStr = e.target.value;
+          state.weekday = getWeekdayFromISO(state.dateStr);
+          if (state.weekday === 'Thursday') {
+            state.thuActivity = 'all_meeting';
+            state.cleanRoom11 = false;
+            state.checkOsh = false;
+            state.thuAfterTaskWard = '';
+            state.thuPca2AfterWard = '';
+          }
+          state.slotOverrides = {};
+          renderAll();
+        });
+
+        // Weekday manual override buttons
+        document.querySelectorAll('.day-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            state.weekday = e.target.dataset.day;
+            if (state.weekday === 'Thursday') {
+              state.thuActivity = 'all_meeting';
+              state.cleanRoom11 = false;
+              state.checkOsh = false;
+              state.thuAfterTaskWard = '';
+              state.thuPca2AfterWard = '';
+            }
+            state.slotOverrides = {};
+            renderAll();
+          });
+        });
+
+        // PCA 1 & PCA 2 inputs
+        document.getElementById('pca1Input').addEventListener('input', (e) => {
+          state.pca1 = e.target.value;
+          updateLiveMessagesOnly();
+        });
+
+        document.getElementById('pca2Input').addEventListener('input', (e) => {
+          state.pca2 = e.target.value;
+          handlePca2AbsenceAutoSync();
+          renderAll();
+        });
+
+        document.getElementById('clearPca2Btn').addEventListener('click', () => {
+          state.pca2 = '';
+          handlePca2AbsenceAutoSync();
+          renderAll();
+        });
+
+        // Monday PRP return ward toggle
+        document.querySelectorAll('.mon-ward-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            state.mondayReturnWard = e.target.dataset.monWard;
+            renderAll();
+          });
+        });
+
+        // Thursday departmental activity radios
+        document.querySelectorAll('input[name="thuActivity"]').forEach((radio) => {
+          radio.addEventListener('change', (e) => {
+            state.thuActivity = e.target.value;
+            state.slotOverrides = {};
+            renderAll();
+          });
+        });
+
+        document.getElementById('chkCleanRoom11').addEventListener('change', (e) => {
+          state.cleanRoom11 = e.target.checked;
+          updateLiveMessagesOnly();
+        });
+
+        document.getElementById('chkCheckOsh').addEventListener('change', (e) => {
+          state.checkOsh = e.target.checked;
+          updateLiveMessagesOnly();
+        });
+
+        document.getElementById('thuAfterTaskWard').addEventListener('input', (e) => {
+          state.thuAfterTaskWard = e.target.value;
+          document.querySelectorAll('.thu-ward-chip').forEach((btn) => {
+            const active = (state.thuAfterTaskWard || '').toUpperCase() === btn.dataset.thuWard;
+            btn.className = active
+              ? 'thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-clinical-700 bg-clinical-700 text-white transition'
+              : 'thu-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+          });
+          updateLiveMessagesOnly();
+        });
+
+        document.querySelectorAll('.thu-ward-chip').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            state.thuAfterTaskWard = e.target.dataset.thuWard;
+            renderAll();
+          });
+        });
+
+        document.getElementById('thuPca2AfterWard').addEventListener('input', (e) => {
+          state.thuPca2AfterWard = e.target.value;
+          document.querySelectorAll('.thu-pca2-ward-chip').forEach((btn) => {
+            const active = (state.thuPca2AfterWard || '').toUpperCase() === btn.dataset.thuPca2Ward;
+            btn.className = active
+              ? 'thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-clinical-700 bg-clinical-700 text-white transition'
+              : 'thu-pca2-ward-chip px-2.5 py-1 rounded-lg text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition';
+          });
+          updateLiveMessagesOnly();
+        });
+
+        document.querySelectorAll('.thu-pca2-ward-chip').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const clicked = e.target.dataset.thuPca2Ward;
+            state.thuPca2AfterWard = state.thuPca2AfterWard === clicked ? '' : clicked;
+            renderAll();
+          });
+        });
+
+        // GROn Down Level Buttons
+        document.querySelectorAll('.down-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            state.downLevel = e.target.dataset.down;
+            state.slotOverrides = {};
+            // If 2nd PCA is blank and user selects Down 0.5/1, default single team to Onco
+            if (state.pca2.trim() === '' && ['0.5 am', '0.5 pm', '1'].includes(state.downLevel)) {
+              state.downSingleTeam = 'Onco';
+            }
+            renderAll();
+          });
+        });
+
+        // Generate & Save button
+        document.getElementById('generateBtn').addEventListener('click', () => {
+          saveCurrentWorkflowToHistory();
+          showToast('Workflow arranged & saved to 7-Day Log!');
+        });
+
+        // Copy WhatsApp message buttons
+        document.querySelectorAll('.copy-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            const targetId = e.currentTarget.dataset.copyTarget;
+            const textarea = document.getElementById(targetId);
+            if (textarea) {
+              copyTextToClipboard(textarea.value);
+            }
+          });
+        });
+
+        // History Modal controls
+        document.getElementById('openHistoryBtn').addEventListener('click', () => {
+          renderHistoryModal();
+          document.getElementById('historyModal').classList.remove('hidden');
+        });
+
+        document.getElementById('closeHistoryBtn').addEventListener('click', () => {
+          document.getElementById('historyModal').classList.add('hidden');
+        });
+
+        document.getElementById('historyBackdrop').addEventListener('click', () => {
+          document.getElementById('historyModal').classList.add('hidden');
+        });
+
+        document.getElementById('clearAllHistoryBtn').addEventListener('click', () => {
+          localStorage.removeItem(STORAGE_KEY);
+          updateHistoryBadge();
+          renderHistoryModal();
+          showToast('All saved history logs cleared.');
+        });
+      }
+
+      /**
+       * Automatically flags Onco shortage if 2nd PCA slot is left blank
+       */
+      function handlePca2AbsenceAutoSync() {
+        if (state.pca2.trim() === '') {
+          if (state.downLevel === '0') {
+            state.downLevel = '1';
+            state.downSingleTeam = 'Onco';
+          } else if (['0.5 am', '0.5 pm', '1'].includes(state.downLevel)) {
+            state.downSingleTeam = 'Onco';
+          }
+        }
+      }
+
+      // Initialize app on load
+      window.addEventListener('DOMContentLoaded', () => {
+        initEventListeners();
+        updateHistoryBadge();
+        renderAll();
+      });
+    })();
+  </script>
+</body>
+</html>
