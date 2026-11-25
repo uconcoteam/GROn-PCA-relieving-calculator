@@ -1,1 +1,0 @@
-# GROn-PCA-relieving-calculator
